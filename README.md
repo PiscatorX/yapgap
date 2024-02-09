@@ -59,7 +59,7 @@ Optional steps include de-novo transcriptome assembly ([Trinity](https://github.
 
 + [Genome Assembly Annotation Service (GAAS)](https://github.com/NBISweden/GAAS)
   - Assembly preprocessing
-    -filtering sequences by size set in config
+    + filtering sequences by size
 
 
 ## Documentation
