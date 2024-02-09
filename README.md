@@ -55,6 +55,13 @@ Optional steps include de-novo transcriptome assembly ([Trinity](https://github.
     nextflow run nf-core/genomeannotator --input samplesheet.csv --outdir <OUTDIR> --genome GRCh37 -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
     ```
 
+## Dependencies
+
++ [Genome Assembly Annotation Service (GAAS)](https://github.com/NBISweden/GAAS)
+  - Assembly preprocessing
+    -filtering sequences by size set in config
+
+
 ## Documentation
 
 The nf-core/genomeannotator pipeline comes with documentation about the pipeline [usage](https://nf-co.re/genomeannotator/usage), [parameters](https://nf-co.re/genomeannotator/parameters) and [output](https://nf-co.re/genomeannotator/output).
