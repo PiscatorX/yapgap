@@ -1,5 +1,6 @@
 process INFERNAL_SEARCH {
-    tag "$meta.id"
+
+    tag "$meta2.id"
     label 'process_high'
     
     conda (params.enable_conda ? "bioconda::infernal=1.1.4" : null)
@@ -8,8 +9,12 @@ process INFERNAL_SEARCH {
         'quay.io/biocontainers/infernal:1.1.4--h779adbc_0' }"
 
     input:
-    tuple val(meta), path(fasta)
-    tuple path(cm),path(i1f),path(i1i),path(i1m),path(i1p)
+    val meta
+    val db_size_mb
+    each path(fasta)
+    tuple val(meta2), path(cm_file)
+    path cm_index
+
 
     output:
     tuple val(meta), path("*.tbl"), emit: tbl
@@ -21,10 +26,22 @@ process INFERNAL_SEARCH {
     rfam_tbl = fasta.getBaseName() + ".rfam.tbl"
     rfam_txt = fasta.getBaseName() + ".rfam.out"
     """
-    cmsearch --rfam --cpu ${task.cpus} --cut_tc --tblout $rfam_tbl -o $rfam_txt $cm $fasta
+    
+    cmsearch \
+       -Z ${db_size_mb} \
+       --rfam \
+       --cpu ${task.cpus} \
+       --cut_tc \
+       --tblout \
+      $rfam_tbl \
+      -o $rfam_txt \
+      $cm_file \
+      $fasta
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         cmsearch: \$(echo \$(cmsearch -h) | head -n2 | tail -n1  | cut -f3 -d " " ))
     END_VERSIONS
+
     """
 }
