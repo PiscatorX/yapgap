@@ -17,7 +17,6 @@
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.fn?a(sta)?$",
-                    "schema": "assets/schema_input.json",
                     "description": "Path to the genome assembly.",
                     "help_text": "This is the assembly you wish to annotate.",
                     "fa_icon": "fas fa-file-csv",
@@ -133,8 +132,7 @@
                     "type": "string",
                     "description": "Taxonomic group to guide repeat masking.",
                     "fa_icon": "fas fa-wrench",
-                    "help_text": "Use this taxonomic group or species to identify and mask repeats. Valid names can, in most cases, be guessed, and follow the nomenclature provided through the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy). This option draws from available data included in [DFam 3.2](https://www.dfam.org/releases/Dfam_3.2/relnotes.txt), which contains HMM profiles for over 273.0000 repeat families from 347 species.",
-                    "default": null
+                    "help_text": "Use this taxonomic group or species to identify and mask repeats. Valid names can, in most cases, be guessed, and follow the nomenclature provided through the [NCBI taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy). This option draws from available data included in [DFam 3.2](https://www.dfam.org/releases/Dfam_3.2/relnotes.txt), which contains HMM profiles for over 273.0000 repeat families from 347 species."
                 },
                 "rm_db": {
                     "type": "string",
@@ -195,14 +193,12 @@
                 },
                 "aug_config_dir": {
                     "type": "string",
-                    "default": null,
                     "fa_icon": "fas fa-folder-open",
                     "description": "A custom config directory for AUGUSTUS",
                     "help_text": "Use this to point to a custom AUGUSTUS config directory - for example if you have trained a new model outside of GENOMEANNOTATOR. Most be compatible with AUGUSTUS 3.4."
                 },
                 "aug_extrinsic_cfg": {
                     "type": "string",
-                    "default": null,
                     "fa_icon": "fas fa-file",
                     "description": "Custom AUGUSTUS extrinsic config file path",
                     "help_text": "Provide a custom extrinsic config file to AUGUSTUS, specifying the weight of different types if evidence. We suggest you start with our [built-in](https://raw.githubusercontent.com/nf-core/genomeannotator/dev/assets/augustus/augustus_default.cfg) base version."
