@@ -10,10 +10,7 @@
             "type": "object",
             "fa_icon": "fas fa-terminal",
             "description": "Define where the pipeline should find input data and save output data.",
-            "required": [
-                "assembly",
-                "outdir"
-            ],
+            "required": ["assembly", "outdir"],
             "properties": {
                 "assembly": {
                     "type": "string",
@@ -23,13 +20,15 @@
                     "schema": "assets/schema_input.json",
                     "description": "Path to the genome assembly.",
                     "help_text": "This is the assembly you wish to annotate.",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-file-csv",
+                    "default": "/new-home/andhlovu/DB_REF/Tests/genome/Zmarina_subsample.fasta"
                 },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-                    "fa_icon": "fas fa-folder-open"
+                    "fa_icon": "fas fa-folder-open",
+                    "default": "/home/andhlovu/yapgap/YAXGAP"
                 },
                 "email": {
                     "type": "string",
@@ -51,7 +50,8 @@
                     "schema": "assets/schema_input.json",
                     "description": "Path to samplesheet for RNAseq data.",
                     "help_text": "If you wish to include RNAseq data, you will need to create a samplesheet in CSV format. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row.",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-file-csv",
+                    "default": "/home/andhlovu/DB_REF/Metadata/RNA_samplesheet.csv"
                 },
                 "proteins": {
                     "type": "string",
@@ -97,7 +97,8 @@
                     "schema": "assets/schema_input.json",
                     "description": "Path to samplesheet for Reference genomes and annotations.",
                     "help_text": "If you wish to If you wish to include annotations from related species (lift-over), you will need to create a samplesheet in CSV format.  Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row.",
-                    "fa_icon": "fas fa-file-csv"
+                    "fa_icon": "fas fa-file-csv",
+                    "default": "/new-home/andhlovu/DB_REF/Metadata/related_genomes_data.csv"
                 }
             }
         },
@@ -111,14 +112,15 @@
                     "type": "integer",
                     "description": "Chunk size for splitting the assembly.",
                     "fa_icon": "fas fa-wrench",
-                    "default": 200000000,
+                    "default": 200,
                     "help_text": "The assembly will split into pieces of this size, in bp, to increase parallelization."
                 },
                 "max_intron_size": {
                     "type": "integer",
                     "description": "Maximum length of expected introns in bp.",
                     "fa_icon": "fas fa-wrench",
-                    "help_text": "This option specifies the longest expected intron in base-pairs. Seeting this too low will result in broken gene models. Conversely, setting this too large may create unreasonable gene models and increase run time."
+                    "help_text": "This option specifies the longest expected intron in base-pairs. Seeting this too low will result in broken gene models. Conversely, setting this too large may create unreasonable gene models and increase run time.",
+                    "default": 20000
                 },
                 "min_contig_size": {
                     "type": "integer",
@@ -141,29 +143,27 @@
                     "description": "A database of curated repeats in EMBL format.",
                     "fa_icon": "fas fa-file",
                     "help_text": "This option points to the DFam database (h5 format) of curated repeats for RepeatMasker. By default, the pipeline will get it on-the-fly from the [DFam server](https://www.dfam.org/releases/Dfam_3.5/families/). You can pre-download the file (.gz) and provide it via this option.",
-                    "default": "https://www.dfam.org/releases/Dfam_3.5/families/Dfam_curatedonly.h5.gz"
+                    "default": "/home/andhlovu/DB_REF/Dfam_3.7/Dfam_curatedonly.h5.gz"
                 },
-
                 "busco_lineage": {
-                   "type": "string",
-                   "fa_icon": "fas fa-wrench",
-                   "description": "Name of a BUSCO taxonomic group to evaluate the completeness of annotated gene set(s).",
-                   "help_text": "Use this to provide the name of a BUSCO [taxonomic group](https://busco.ezlab.org/list_of_lineages.html) against which to evaluate the resulting gene builds. Format should be taxgroup_odb10 (i.e. without the date).",
-                   "default": null
+                    "type": "string",
+                    "fa_icon": "fas fa-wrench",
+                    "description": "Name of a BUSCO taxonomic group to evaluate the completeness of annotated gene set(s).",
+                    "help_text": "Use this to provide the name of a BUSCO [taxonomic group](https://busco.ezlab.org/list_of_lineages.html) against which to evaluate the resulting gene builds. Format should be taxgroup_odb10 (i.e. without the date).",
+                    "default": "liliopsida"
                 },
-		"busco_db_path": {
-                   "type": "string",
-                   "fa_icon": "fas fa-folder-open",
-                   "description": "Path to the local BUSCO data.",
-                   "help_text": "Use this to provide the path to a local copy of the busco database (usually /path/to/busco_downloads). For details, see the BUSCO [documentation](https://busco.ezlab.org/busco_userguide.html#download-and-automated-update).",
-                   "default": null
+                "busco_db_path": {
+                    "type": "string",
+                    "fa_icon": "fas fa-folder-open",
+                    "description": "Path to the local BUSCO data.",
+                    "help_text": "Use this to provide the path to a local copy of the busco database (usually /path/to/busco_downloads). For details, see the BUSCO [documentation](https://busco.ezlab.org/busco_userguide.html#download-and-automated-update).",
+                    "default": "/home/andhlovu/DB_REF/busco/"
                 },
                 "dummy_gff": {
-                   "type": "string",
-                   "default": "PIPELINE_BASE/assets/empty.gff3",
-                   "description": "A placeholder gff file to help trigger certain processes."
+                    "type": "string",
+                    "default": "/new-home/andhlovu/yapgap/assets/empty.gff3",
+                    "description": "A placeholder gff file to help trigger certain processes."
                 }
-
             }
         },
         "augustus_options": {
@@ -176,7 +176,8 @@
                     "type": "string",
                     "description": "AUGUSTUS species model to use.",
                     "fa_icon": "fas fa-book",
-                    "help_text": "Specify which model AUGUSTUS will run with. A full list is available here: https://github.com/Gaius-Augustus/Augustus/blob/master/docs/RUNNING-AUGUSTUS.md"
+                    "help_text": "Specify which model AUGUSTUS will run with. A full list is available here: https://github.com/Gaius-Augustus/Augustus/blob/master/docs/RUNNING-AUGUSTUS.md",
+                    "default": "Zostera capensis"
                 },
                 "aug_options": {
                     "type": "string",
@@ -215,7 +216,6 @@
                 },
                 "aug_training": {
                     "type": "boolean",
-                    "default": false,
                     "description": "Enable training of a new AUGUSTUS profile.",
                     "fa_icon": "fas fa-wrench",
                     "help_text": "This option enables training of a new AUGUSTUS prediction profile. You must provide either a full (!) species-specific proteome via --proteins_targeted or a sufficiently comprehensive set of transcripts/RNA-seq data. When both are provided, proteins will be preferred."
@@ -335,7 +335,7 @@
                     "type": "integer",
                     "default": 90,
                     "fa_icon": "fas fa-wrench",
-                    "description" : "ID threshold for targeted protein alignments."
+                    "description": "ID threshold for targeted protein alignments."
                 }
             }
         },
@@ -353,7 +353,7 @@
                 },
                 "pasa_config_file": {
                     "type": "string",
-                    "default": "PIPELINE_BASE/assets/pasa/alignAssembly.config",
+                    "default": "/new-home/andhlovu/yapgap/assets/pasa/alignAssembly.config",
                     "fa_icon": "fas fa-wrench",
                     "description": "Built-in config file for PASA."
                 }
@@ -365,18 +365,18 @@
             "fa_icon": "fas fa-fna",
             "description": "Options that control the EvidenceModeler pipeline",
             "properties": {
-               "evm_weights": {
-                  "type": "string",
-                  "default": "None",
-                  "fa_icon": "fas fa-tape",
-                  "description": "Weights file for EVM."
-               },
-               "nevm": {
-                  "type": "integer",
-                  "default": 10,
-                  "fa_icon": "fas fa-wrench",
-                  "description" :"Number of EVM jobs per chunk."
-               }
+                "evm_weights": {
+                    "type": "string",
+                    "default": "/new-home/andhlovu/yapgap/assets/evm/weights.txt",
+                    "fa_icon": "fas fa-tape",
+                    "description": "Weights file for EVM."
+                },
+                "nevm": {
+                    "type": "integer",
+                    "default": 10,
+                    "fa_icon": "fas fa-wrench",
+                    "description": "Number of EVM jobs per chunk."
+                }
             }
         },
         "annotation_tool_options": {
@@ -407,7 +407,8 @@
                     "type": "boolean",
                     "description": "Activate search for ncRNAs with RFam/infernal",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Perform prediction of non-coding RNAs using CM profiles from Rfam release 14."
+                    "help_text": "Perform prediction of non-coding RNAs using CM profiles from Rfam release 14.",
+                    "default": true
                 }
             }
         },
@@ -469,7 +470,7 @@
                 "max_cpus": {
                     "type": "integer",
                     "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 16,
+                    "default": 48,
                     "fa_icon": "fas fa-microchip",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
@@ -477,7 +478,7 @@
                 "max_memory": {
                     "type": "string",
                     "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "128.GB",
+                    "default": "100.GB",
                     "fa_icon": "fas fa-memory",
                     "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
                     "hidden": true,
@@ -560,14 +561,13 @@
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "${params.outdir}/pipeline_info",
+                    "default": "/home/andhlovu/yapgap/YAXGAP/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
                 "validate_params": {
                     "type": "boolean",
                     "description": "Boolean whether to validate parameters against the schema at runtime",
-                    "default": true,
                     "fa_icon": "fas fa-check-square",
                     "hidden": true
                 },
@@ -620,5 +620,28 @@
         }
     ],
     "properties": {
+        "assembly_ref": {
+            "type": "string",
+            "default": "Zcapensis_draft2"
+        },
+        "db_ref": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/"
+        },
+        "rfam_cm_gz": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/Rfam/14.10/Rfam.cm.gz"
+        },
+        "rfam_family_gz": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/Rfam/14.10/family.txt.gz"
+        },
+        "busco_config": {
+            "type": "string"
+        },
+        "schema_ignore_params": {
+            "type": "string",
+            "default": "genomes"
+        }
     }
 }

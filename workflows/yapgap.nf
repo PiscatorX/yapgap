@@ -7,7 +7,29 @@
 //def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 
 // Validate input parameters
-//WorkflowGenomeannotator.initialise(params, log)
+
+include { validateParameters; paramsHelp; paramsSummaryLog; fromSamplesheet } from 'plugin/nf-validation'
+
+// Print help message, supply typical command line usage for the pipeline
+if (params.help) {
+   log.info paramsHelp("nextflow run my_pipeline --input input_file.csv")
+   exit 0
+}
+
+// Validate input parameters
+validateParameters()
+
+// Print summary of supplied parameters
+log.info paramsSummaryLog(workflow)
+
+// Create a new channel of metadata from a sample sheet
+// NB: `input` corresponds to `params.input` and associated sample sheet schema
+ch_input = Channel.fromSamplesheet("input")
+
+WorkflowYAPGAP.initialise(params, log)
+
+
+
 
 //def checkPathParamList = [ params.multiqc_config, params.assembly ]
 //for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
@@ -48,7 +70,7 @@ include { FASTASPLITTER } from '../modules/local/fastasplitter'
 include { ASSEMBLY_PREPROCESS } from '../subworkflows/local/assembly_preprocess'
 include { REPEATMASKER } from '../subworkflows/local/repeatmasker'
 include { SPALN_ALIGN_PROTEIN ; SPALN_ALIGN_PROTEIN as SPALN_ALIGN_MODELS } from '../subworkflows/local/spaln_align_protein'
-include { RNASEQ_ALIGN } from '../subworkflows/local/rnaseq_align'
+include { RNASEQ_ALIGN_HISAT } from '../subworkflows/local/rnaseq_align_hisat2'
 include { MINIMAP_ALIGN_TRANSCRIPTS ; MINIMAP_ALIGN_TRANSCRIPTS as TRINITY_ALIGN_TRANSCRIPTS } from '../subworkflows/local/minimap_align_transcripts'
 include { AUGUSTUS_PIPELINE } from '../subworkflows/local/augustus_pipeline'
 include { PASA_PIPELINE } from '../subworkflows/local/pasa_pipeline'
@@ -107,7 +129,28 @@ workflow YAPGAP {
     fasta_chunks = FASTASPLITTER.out.meta.combine(FASTASPLITTER.out.chunks.flatten())
     /* ######################################################################### */
 
+    Channel.fromSamplesheet("input").splitCsv( header: true )
 
+// .map {
+//             meta, fastq_1, fastq_2 ->
+//                 if (!fastq_2) {
+//                     return [ meta.id, meta + [ single_end:true ], [ fastq_1 ] ]
+//                 } else {
+//                     return [ meta.id, meta + [ single_end:false ], [ fastq_1, fastq_2 ] ]
+//                 }
+//         }
+//         .groupTuple()
+//         .map {
+//             WorkflowRnaseq.validateInput(it)
+//         }
+//         .branch {
+//             meta, fastqs ->
+//                 single  : fastqs.size() == 1
+//                     return [ meta, fastqs.flatten() ]
+//                 multiple: fastqs.size() > 1
+//                     return [ meta, fastqs.flatten() ]
+//         }
+//         .set { ch_fastq }
 
 
 
