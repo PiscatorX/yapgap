@@ -28,7 +28,7 @@
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open",
-                    "default": "/home/andhlovu/yapgap/YAXGAP"
+                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/YAXGAP"
                 },
                 "email": {
                     "type": "string",
@@ -51,7 +51,7 @@
                     "description": "Path to samplesheet for RNAseq data.",
                     "help_text": "If you wish to include RNAseq data, you will need to create a samplesheet in CSV format. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv",
-                    "default": "/home/andhlovu/DB_REF/Metadata/RNA_samplesheet.csv"
+                    "default": "/opt/DB_REF/Metadata/RNA_samplesheet.csv"
                 },
                 "proteins": {
                     "type": "string",
@@ -143,7 +143,7 @@
                     "description": "A database of curated repeats in EMBL format.",
                     "fa_icon": "fas fa-file",
                     "help_text": "This option points to the DFam database (h5 format) of curated repeats for RepeatMasker. By default, the pipeline will get it on-the-fly from the [DFam server](https://www.dfam.org/releases/Dfam_3.5/families/). You can pre-download the file (.gz) and provide it via this option.",
-                    "default": "/home/andhlovu/DB_REF/Dfam_3.7/Dfam_curatedonly.h5.gz"
+                    "default": "/opt/DB_REF/Dfam_3.7/Dfam_curatedonly.h5.gz"
                 },
                 "busco_lineage": {
                     "type": "string",
@@ -157,11 +157,11 @@
                     "fa_icon": "fas fa-folder-open",
                     "description": "Path to the local BUSCO data.",
                     "help_text": "Use this to provide the path to a local copy of the busco database (usually /path/to/busco_downloads). For details, see the BUSCO [documentation](https://busco.ezlab.org/busco_userguide.html#download-and-automated-update).",
-                    "default": "/home/andhlovu/DB_REF/busco/"
+                    "default": "/opt/DB_REF/busco/"
                 },
                 "dummy_gff": {
                     "type": "string",
-                    "default": "/new-home/andhlovu/yapgap/assets/empty.gff3",
+                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/empty.gff3",
                     "description": "A placeholder gff file to help trigger certain processes."
                 }
             }
@@ -353,7 +353,7 @@
                 },
                 "pasa_config_file": {
                     "type": "string",
-                    "default": "/new-home/andhlovu/yapgap/assets/pasa/alignAssembly.config",
+                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/pasa/alignAssembly.config",
                     "fa_icon": "fas fa-wrench",
                     "description": "Built-in config file for PASA."
                 }
@@ -367,7 +367,7 @@
             "properties": {
                 "evm_weights": {
                     "type": "string",
-                    "default": "/new-home/andhlovu/yapgap/assets/evm/weights.txt",
+                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/evm/weights.txt",
                     "fa_icon": "fas fa-tape",
                     "description": "Weights file for EVM."
                 },
@@ -561,7 +561,7 @@
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "/home/andhlovu/yapgap/YAXGAP/pipeline_info",
+                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/YAXGAP/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
@@ -626,15 +626,15 @@
         },
         "db_ref": {
             "type": "string",
-            "default": "/home/andhlovu/DB_REF/"
+            "default": "/opt/DB_REF/"
         },
         "rfam_cm_gz": {
             "type": "string",
-            "default": "/home/andhlovu/DB_REF/Rfam/14.10/Rfam.cm.gz"
+            "default": "/opt/DB_REF/Rfam/14.10/Rfam.cm.gz"
         },
         "rfam_family_gz": {
             "type": "string",
-            "default": "/home/andhlovu/DB_REF/Rfam/14.10/family.txt.gz"
+            "default": "/opt/DB_REF/Rfam/14.10/family.txt.gz"
         },
         "busco_config": {
             "type": "string"
