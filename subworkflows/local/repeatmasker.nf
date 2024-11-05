@@ -6,7 +6,7 @@ include { REPEATMASKER_STAGELIB } from '../../modules/local/repeatmasker/stageli
 include { REPEATMASKER_REPEATMASK } from '../../modules/local/repeatmasker/repeatmask'
 include { FASTASPLITTER } from '../../modules/local/fastasplitter'
 include { CAT_FASTA as REPEATMASKER_CAT_FASTA} from '../../modules/local/cat/fasta'
-include { GUNZIP } from '../../modules/nf-core/modules/gunzip/main'
+include { GUNZIP } from '../../modules/nf-core/gunzip/main'
 
 workflow REPEATMASKER {
     take:

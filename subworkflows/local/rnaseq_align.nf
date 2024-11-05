@@ -1,103 +1,125 @@
-//
-// Check input samplesheet and get read channels
-//
+include { FASTQ_ALIGN_HISAT2 } from '../../subworkflows/local/fastq_align_hisat2/main'
+include { SAMTOOLS_MERGE } from '../../modules/nf-core/samtools/merge'
 
-include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
-include { STAR_INDEX } from '../../modules/local/star/index'
-include { STAR_ALIGN as STAR_ALIGN_PASS_ONE ; STAR_ALIGN as STAR_ALIGN_PASS_TWO } from '../../modules/local/star/align'
-include { FASTP } from '../../modules/local/fastp'
-include { CAT_FASTQ } from '../../modules/nf-core/modules/cat/fastq/main'
 
-workflow RNASEQ_ALIGN {
+workflow RNASEQ_ALIGN{
 
     take:
-    genome // file path
-    samplesheet // file path
+    ch_filtered_reads
+    fai
+    star_index
+    hisat2_index
+    ch_assembly
+  
 
     main:
     
-    STAR_INDEX(
-       genome
-    )
-    SAMPLESHEET_CHECK ( samplesheet )
-        .csv
-        .splitCsv ( header:true, sep:',' )
-        .map { create_fastq_channel(it) }
-        .set { reads }
-
-    FASTP(
-       reads
-    )
+    //
+    // SUBWORKFLOW: Alignment with STAR and gene/transcript quantification with Salmon
+    //
+    ch_genome_bam                 = Channel.empty()
+    ch_genome_bam_index           = Channel.empty()
+    ch_samtools_stats             = Channel.empty()
+    ch_samtools_flagstat          = Channel.empty()
+    ch_samtools_idxstats          = Channel.empty()
+    ch_star_multiqc               = Channel.empty()
+    ch_aligner_pca_multiqc        = Channel.empty()
+    ch_aligner_clustering_multiqc = Channel.empty()
+    ch_genome_bam_merged          = Channel.empty() 
+    ch_genome_bam_merged_csi      = Channel.empty()
+    ch_versions 		  = Channel.empty()
     
-    FASTP.out.reads
-        .map {
-           meta,fastq ->
-               meta.id = (meta.id.contains("SRR")) ? meta.id : meta.id.split('_')[0..-2].join('_')
-           [ meta , fastq ] }
-        .groupTuple(by: [0])
-        .branch {
-           meta, fastq ->
-              single: fastq.size() == 1
-                 return [ meta, fastq.flatten() ]
-              multiple: fastq.size() > 1
-                 return [ meta, fastq.flatten() ]
-              
-        }
-        .set { ch_fastq }
+    
+   if (params.aligner == 'hisat2') {
+      //
+      // SUBWORKFLOW: Alignment with HISAT2
+      //
+      ch_hisat2_multiqc = Channel.empty()
+      FASTQ_ALIGN_HISAT2(ch_filtered_reads,
+			    hisat2_index,
+			    ch_assembly)
 
-    //
-    // MODULE: concatenate reads per library
-    CAT_FASTQ(
-       ch_fastq.multiple
-    ).reads
-    .mix( ch_fastq.single )
-    .set { ch_cat_fastq }
+     ch_genome_bam        = FASTQ_ALIGN_HISAT2.out.bam
+     ch_genome_bam_index  = FASTQ_ALIGN_HISAT2.out.bai
+     ch_samtools_stats    = FASTQ_ALIGN_HISAT2.out.stats
+     ch_samtools_flagstat = FASTQ_ALIGN_HISAT2.out.flagstat
+     ch_samtools_idxstats = FASTQ_ALIGN_HISAT2.out.idxstats
+     ch_hisat2_multiqc    = FASTQ_ALIGN_HISAT2.out.summary
 
-    //
-    // MODULE: Align reads, first pass to produce junction information
-    STAR_ALIGN_PASS_ONE(
-       STAR_INDEX.out.star_index.collect(),
-       ch_cat_fastq,
-       Channel.from(params.dummy_gff).collect(),
-       true
-    )
+     if (params.bam_csi_index) {
 
-    junctions = STAR_ALIGN_PASS_ONE.out.junctions.collectFile(name: 'all_juncs.gtf')
-   
-    //
-    // MODULE: Align reads with junction information
-    STAR_ALIGN_PASS_TWO(
-       STAR_INDEX.out.star_index.collect(),
-       FASTP.out.reads,
-       junctions.collect(),
-       false
-    )
- 
-    emit:
-    bam = STAR_ALIGN_PASS_TWO.out.bam
-    json = FASTP.out.json
-    html = FASTP.out.html
-    versions = STAR_INDEX.out.versions.mix(STAR_ALIGN_PASS_ONE.out.versions,FASTP.out.versions)
+	 ch_genome_bam_index = FASTQ_ALIGN_HISAT2.out.csi
+
+     }
+     
+    
+     ch_versions = ch_versions.mix(FASTQ_ALIGN_HISAT2.out.versions)
+
+     }else{
+
+     if (params.aligner == 'star') {
+
+	ALIGN_STAR (
+	    ch_strand_inferred_filtered_fastq,
+	    PREPARE_GENOME.out.star_index.map { [ [:], it ] },
+	    PREPARE_GENOME.out.gtf.map { [ [:], it ] },
+	    params.star_ignore_sjdbgtf,
+	    '',
+	    params.seq_center ?: '',
+	    is_aws_igenome,
+	    PREPARE_GENOME.out.fasta.map { [ [:], it ] }
+	)
+
+	ch_genome_bam        = ALIGN_STAR.out.bam
+	ch_genome_bam_index  = ALIGN_STAR.out.bai
+	ch_transcriptome_bam = ALIGN_STAR.out.bam_transcript
+	ch_samtools_stats    = ALIGN_STAR.out.stats
+	ch_samtools_flagstat = ALIGN_STAR.out.flagstat
+	ch_samtools_idxstats = ALIGN_STAR.out.idxstats
+	ch_star_multiqc      = ALIGN_STAR.out.log_final
+
+	if (params.bam_csi_index) {
+	    ch_genome_bam_index = ALIGN_STAR.out.csi
+	}
+
+	ch_versions = ch_versions.mix(ALIGN_STAR.out.versions)
+
+     }
+
+    }
+
+     bam_files = ch_genome_bam.map{ it[1]}.collect().map{ collection_meta(it) }
+
+     SAMTOOLS_MERGE(bam_files, ch_assembly, fai.collect().map{[[:], it ]} )
+     
+     ch_genome_bam_merged = SAMTOOLS_MERGE.out.bam       
+
+     ch_genome_bam_merged_csi = SAMTOOLS_MERGE.out.csi
+
+    
+     emit:
+     ch_star_multiqc
+     ch_genome_bam       
+     ch_genome_bam_index 
+     ch_samtools_stats   
+     ch_samtools_flagstat
+     ch_samtools_idxstats
+     ch_hisat2_multiqc
+     ch_genome_bam_merged        
+     ch_genome_bam_merged_csi
+     ch_versions   
+
+
 }
 
-def create_fastq_channel(LinkedHashMap row) {
-    // sample,fastq_1,fastq_2,strandedness
-    def meta = [:]
-    meta.id           = row.sample
-    meta.single_end   = row.single_end.toBoolean()
-    meta.strandedness = row.strandedness
 
-    def array = []
-    if (!file(row.fastq_1).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
-    }
-    if (meta.single_end) {
-        array = [ meta, [ file(row.fastq_1) ] ]
-    } else {
-        if (!file(row.fastq_2).exists()) {
-            exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
-        }
-        array = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
-    }
+
+
+def collection_meta(collection){
+
+    def meta = [:]
+    meta.id = file(params.assembly).getSimpleName()
+    def array = [ meta, collection ]
+
     return array
 }

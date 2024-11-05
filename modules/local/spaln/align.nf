@@ -1,6 +1,7 @@
 process SPALN_ALIGN {
+
     tag "$meta.id | $meta_p.id"
-    label 'process_high'
+    label 'process_low'
     
     conda (params.enable_conda ? "bioconda::spaln=2.4.7" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -11,7 +12,6 @@ process SPALN_ALIGN {
     tuple val(meta), path(spaln_index)
     tuple val(meta_p), path(proteins)
     val spaln_q
-    val spaln_taxon
     val spaln_options
 
     output:
@@ -24,11 +24,25 @@ process SPALN_ALIGN {
     chunk_name = proteins.getBaseName()
 
     """
-    spaln -o $chunk_name -Q${spaln_q} -T${spaln_taxon} ${spaln_options} -O12 -t${task.cpus} -Dgenome_spaln $proteins
-
+    spaln \
+        -o $chunk_name \
+        -O 12 \
+        -Q ${spaln_q} \
+        -t ${task.cpus} \
+        -d genome_spaln \
+	 $proteins 
+    
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         spaln: \$(echo \$( spaln 2>&1 | head -n3 | tail -n1 | cut -f4 -d " " ))
     END_VERSIONS
-    """
+   """
 }
+
+
+
+// spaln \
+//         -o $chunk_name ${spaln_options} \
+//         -Q ${spaln_q} \
+//         -O 12 -t${task.cpus} \
+//         -d genome_spaln $proteins

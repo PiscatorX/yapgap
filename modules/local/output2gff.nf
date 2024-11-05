@@ -3,12 +3,9 @@ process TOGFF{
     tag "$meta.id"
     label 'process_low'
 
-    // conda "bioconda::biopython=1.70"
-    // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    //     'biocontainers/biopython:1.70--np112py27_1' }"
-
+   
     input:
-    val meta
+    tuple val(meta), path(query)
     path output
     val tool
 

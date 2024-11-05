@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import itertools as it
-import pandas as pd
+import csv
+import copy
 import pprint
 import argparse
 from BCBio import GFF
@@ -38,53 +39,60 @@ class GenGFF(object):
 
         for n_line, line in  enumerate(self.f_obj):
            if n_line in header_lines:
-               header_tuples.append(line.strip().split("\t"))
+               header = line.strip().split("\t")
+               if line.startswith("Sequence"):
+                   pass
+               header_tuples.append(header)
            if (n_line == max(header_lines)):
                break
 
         headers_raw = [' '.join(pair).strip() for pair in  pair_zip(header_tuples) ]
-        self.header_map =  [ self.head_map.get(key, key) for key in  headers_raw]
+        
+        self.header_map =  [ self.head_map.get(key, key) for key in  headers_raw]      
 
-      
-    def combine_columns(self, row):
-   
-        attributes_cols = [ col for col in self.trna_df.columns if col not in self.gff_headers ]  
-
-        return dict([(col.lower(), row[col].lower() ) for col in attributes_cols ])
+        print(self.header_map)
         
       
     def extract_feat(self, f_obj, header_map):
 
-        self.trna_df = pd.read_csv(self.f_obj, delimiter="\t", names = header_map, encoding="ascii")
-        self.trna_df = self.trna_df[self.trna_df.seqid != "--------"]
+       
+        self.trna_df = []
         
-        #seqid  tRNA #  start  end Anti Type  Codon  SeqID  SeqLen  score
-        self.trna_df = self.trna_df.assign(source = 'tRNAscan-SE', type = 'tRNA', strand = 1, phase = '.')
-        self.trna_df.loc[self.trna_df.loc[:,'start'] > self.trna_df.loc[:,'end'], 'strand']  = -1
-        self.trna_df['attributes'] = self.trna_df.apply(self.combine_columns, axis=1)
-        
+        reader = csv.reader(self.f_obj, delimiter='\t')
 
+        for row in reader:
+            if row[0].startswith('-'):
+                continue
+           
+            row_dict = dict(zip(header_map, row))
+            qualifiers = dict((k,v ) for k,v in row_dict.items() if k not in self.gff_headers)
+            row_dict = dict((k.lower(), str(v).lower() ) for k,v in row_dict.items() if k in self.gff_headers)
+            row_dict.update({'source': 'tRNAscan-SE', 'type': 'tRNA', 'phase': '.'})
+            row_dict['strand'] = '-1' if int(row_dict['start'])  >  int(row_dict['end']) else '1'
+            row_dict['qualifiers'] = qualifiers
+            self.trna_df.append(row_dict)
+            
 
     def write_features(self):
 
        self.gff_records = []
-       for index, row in self.trna_df.iterrows():
+       for row in self.trna_df:
            seq = Seq('', length = None)
            rec = SeqRecord(seq, row.pop('seqid'))
-           row.attributes.update({ 'source': self.source })
-           qualifiers = row.attributes
+           if not self.source:
+               row.update({ 'source': self.source })
+               
            start = int(row['start'])
            end = int(row['end'])
            if (start > end):
                start, end = (end, start)
+               
            top_feature = SeqFeature(FeatureLocation(start, end),
                                     type = self.type,
-                                    strand = row.strand,
-                                    qualifiers=qualifiers)
+                                    qualifiers = row['qualifiers'] )
            rec.features = [top_feature]
            
            self.gff_records.append(rec)
-
            
        with open(self.outfile, "w") as out_handle:
            GFF.write(self.gff_records, out_handle)

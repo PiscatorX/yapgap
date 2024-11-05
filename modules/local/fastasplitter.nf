@@ -12,7 +12,8 @@ process FASTASPLITTER {
     val(fsize) // size of fasta chunks to produce
 
     output:
-    tuple val(meta), path("*.part-*.*"), emit: chunks
+    val(meta), emit: meta
+    path("*.part-*.*"), emit: chunks
     path "versions.yml"           , emit: versions
 
     script:

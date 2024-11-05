@@ -1,4 +1,5 @@
 process SPALN_MAKEINDEX {
+
     tag "$meta.id"
     label 'process_medium'
     

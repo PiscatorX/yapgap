@@ -9,12 +9,11 @@ process INFERNAL_SEARCH {
         'quay.io/biocontainers/infernal:1.1.4--h779adbc_0' }"
 
     input:
-    val meta
     val db_size_mb
-    each path(fasta)
-    tuple val(meta2), path(cm_file)
+    tuple val(meta), path(fasta)
     path cm_index
-
+    tuple val(meta2), path(cm_file)
+    
 
     output:
     tuple val(meta), path("*.tbl"), emit: tbl

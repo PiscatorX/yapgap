@@ -20,14 +20,14 @@
                     "description": "Path to the genome assembly.",
                     "help_text": "This is the assembly you wish to annotate.",
                     "fa_icon": "fas fa-file-csv",
-                    "default": "/new-home/andhlovu/DB_REF/Tests/genome/Zmarina_subsample.fasta"
+                    "default": "/home/andhlovu/DB_REF/Zostera_GenomeFiles/sub_Zcap_reduced_v4.fa"
                 },
                 "outdir": {
                     "type": "string",
                     "format": "directory-path",
                     "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
                     "fa_icon": "fas fa-folder-open",
-                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/YAXGAP"
+                    "default": "/home/andhlovu/yapgap/YAXGAP"
                 },
                 "email": {
                     "type": "string",
@@ -50,7 +50,7 @@
                     "description": "Path to samplesheet for RNAseq data.",
                     "help_text": "If you wish to include RNAseq data, you will need to create a samplesheet in CSV format. Use this parameter to specify its location. It has to be a comma-separated file with 4 columns, and a header row.",
                     "fa_icon": "fas fa-file-csv",
-                    "default": "/opt/DB_REF/Metadata/RNA_samplesheet.csv"
+                    "default": "/home/andhlovu/DB_REF/Metadata/RNA_samplesheet_AN.csv"
                 },
                 "proteins": {
                     "type": "string",
@@ -59,16 +59,8 @@
                     "fa_icon": "fas fa-file",
                     "pattern": "^\\S+\\.fn?a(sta)?$",
                     "description": "Path to a fasta file with proteins",
-                    "help_text": "Specify a fasta-formatted file with proteins from related organisms. Typical sources are Uniprot, EnsEMBL or Refseq."
-                },
-                "proteins_targeted": {
-                    "type": "string",
-                    "format": "file-path",
-                    "mimetype": "text/csv",
-                    "fa_icon": "fas fa-file",
-                    "pattern": "^\\S+\\.fn?a(sta)?$",
-                    "description": "Path to a fasta file with proteins",
-                    "help_text": "Specify a fasta-formatted file with proteins your organism of interest. Typical sources are Uniprot, EnsEMBL or Refseq."
+                    "help_text": "Specify a fasta-formatted file with proteins from related organisms. Typical sources are Uniprot, EnsEMBL or Refseq.",
+                    "default": "/home/andhlovu/DB_REF/OrthoDBv11/Viridiplantae.fa"
                 },
                 "transcripts": {
                     "type": "string",
@@ -110,7 +102,7 @@
                     "type": "integer",
                     "description": "Chunk size for splitting the assembly.",
                     "fa_icon": "fas fa-wrench",
-                    "default": 200,
+                    "default": 7500000,
                     "help_text": "The assembly will split into pieces of this size, in bp, to increase parallelization."
                 },
                 "max_intron_size": {
@@ -140,26 +132,7 @@
                     "description": "A database of curated repeats in EMBL format.",
                     "fa_icon": "fas fa-file",
                     "help_text": "This option points to the DFam database (h5 format) of curated repeats for RepeatMasker. By default, the pipeline will get it on-the-fly from the [DFam server](https://www.dfam.org/releases/Dfam_3.5/families/). You can pre-download the file (.gz) and provide it via this option.",
-                    "default": "/opt/DB_REF/Dfam_3.7/Dfam_curatedonly.h5.gz"
-                },
-                "busco_lineage": {
-                    "type": "string",
-                    "fa_icon": "fas fa-wrench",
-                    "description": "Name of a BUSCO taxonomic group to evaluate the completeness of annotated gene set(s).",
-                    "help_text": "Use this to provide the name of a BUSCO [taxonomic group](https://busco.ezlab.org/list_of_lineages.html) against which to evaluate the resulting gene builds. Format should be taxgroup_odb10 (i.e. without the date).",
-                    "default": "liliopsida"
-                },
-                "busco_db_path": {
-                    "type": "string",
-                    "fa_icon": "fas fa-folder-open",
-                    "description": "Path to the local BUSCO data.",
-                    "help_text": "Use this to provide the path to a local copy of the busco database (usually /path/to/busco_downloads). For details, see the BUSCO [documentation](https://busco.ezlab.org/busco_userguide.html#download-and-automated-update).",
-                    "default": "/opt/DB_REF/busco/"
-                },
-                "dummy_gff": {
-                    "type": "string",
-                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/empty.gff3",
-                    "description": "A placeholder gff file to help trigger certain processes."
+                    "default": "/home/andhlovu/DB_REF/Dfam_3.7/Dfam_curatedonly.h5.gz"
                 }
             }
         },
@@ -176,44 +149,12 @@
                     "help_text": "Specify which model AUGUSTUS will run with. A full list is available here: https://github.com/Gaius-Augustus/Augustus/blob/master/docs/RUNNING-AUGUSTUS.md",
                     "default": "Zostera capensis"
                 },
-                "aug_options": {
-                    "type": "string",
-                    "default": "--alternatives-from-evidence=on --minexonintronprob=0.08 --minmeanexonintronprob=0.4 --maxtracks=3",
-                    "description": "Options to pass to AUGUSTUS.",
-                    "fa_icon": "fas fa-wrench",
-                    "help_text": "AUGUSTUS has many options that are not specifically available as pipeline options. Instead, you can pass them through this flag."
-                },
-                "aug_config_container": {
-                    "type": "string",
-                    "default": "/usr/local/config",
-                    "fa_icon": "fas fa-folder-open",
-                    "description": "Location of the AUGUSTUS config directory within the docker container",
-                    "help_text": "This option specifies where to find the AUGUSTUS config directory inside the Docker container. Normally, you should not change this!"
-                },
                 "aug_config_dir": {
                     "type": "string",
                     "fa_icon": "fas fa-folder-open",
                     "description": "A custom config directory for AUGUSTUS",
-                    "help_text": "Use this to point to a custom AUGUSTUS config directory - for example if you have trained a new model outside of GENOMEANNOTATOR. Most be compatible with AUGUSTUS 3.4."
-                },
-                "aug_extrinsic_cfg": {
-                    "type": "string",
-                    "fa_icon": "fas fa-file",
-                    "description": "Custom AUGUSTUS extrinsic config file path",
-                    "help_text": "Provide a custom extrinsic config file to AUGUSTUS, specifying the weight of different types if evidence. We suggest you start with our [built-in](https://raw.githubusercontent.com/nf-core/genomeannotator/dev/assets/augustus/augustus_default.cfg) base version."
-                },
-                "aug_chunk_length": {
-                    "type": "integer",
-                    "default": 3000000,
-                    "description": "Length of annotation chunks in AUGUSTUS",
-                    "fa_icon": "fas fa-wrench",
-                    "help_text": "This value determines the length of a region worked on by each AUGUSTUS sub process. The overlap between neighboring chunks is 1/6 the chunk length. The default value should be adequate for most scenarios."
-                },
-                "aug_training": {
-                    "type": "boolean",
-                    "description": "Enable training of a new AUGUSTUS profile.",
-                    "fa_icon": "fas fa-wrench",
-                    "help_text": "This option enables training of a new AUGUSTUS prediction profile. You must provide either a full (!) species-specific proteome via --proteins_targeted or a sufficiently comprehensive set of transcripts/RNA-seq data. When both are provided, proteins will be preferred."
+                    "help_text": "Use this to point to a custom AUGUSTUS config directory - for example if you have trained a new model outside of GENOMEANNOTATOR. Most be compatible with AUGUSTUS 3.4.",
+                    "default": "/usr/share/augustus/config/"
                 },
                 "pri_prot": {
                     "type": "integer",
@@ -287,10 +228,11 @@
             "description": "Options that control processing of protein evidences",
             "properties": {
                 "spaln_taxon": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "Taxon model to use for SPALN protein alignments.",
                     "fa_icon": "fas fa-wrench",
-                    "help_text": "This option specifies which SPALN alignment model to use. For a full list of available models, see: https://github.com/ogotoh/spaln/blob/master/table/gnm2tab"
+                    "help_text": "This option specifies which SPALN alignment model to use. For a full list of available models, see: https://github.com/ogotoh/spaln/blob/master/table/gnm2tab",
+                    "default": 4
                 },
                 "spaln_options": {
                     "type": "string",
@@ -322,13 +264,13 @@
                 },
                 "spaln_q": {
                     "type": "integer",
-                    "default": 5,
+                    "default": 7,
                     "fa_icon": "fas fa-wrench",
                     "description": "Q value for the SPALN alignment algorithm."
                 },
                 "spaln_protein_id_targeted": {
                     "type": "integer",
-                    "default": 90,
+                    "default": 60,
                     "fa_icon": "fas fa-wrench",
                     "description": "ID threshold for targeted protein alignments."
                 }
@@ -348,7 +290,7 @@
                 },
                 "pasa_config_file": {
                     "type": "string",
-                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/pasa/alignAssembly.config",
+                    "default": "/new-home/andhlovu/yapgap/assets/pasa/alignAssembly.config",
                     "fa_icon": "fas fa-wrench",
                     "description": "Built-in config file for PASA."
                 }
@@ -362,7 +304,7 @@
             "properties": {
                 "evm_weights": {
                     "type": "string",
-                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/assets/evm/weights.txt",
+                    "default": "/new-home/andhlovu/yapgap/assets/evm/weights.txt",
                     "fa_icon": "fas fa-tape",
                     "description": "Weights file for EVM."
                 },
@@ -380,12 +322,6 @@
             "fa_icon": "fas fa-fna",
             "description": "Options that control individual tool behavior",
             "properties": {
-                "trinity": {
-                    "type": "boolean",
-                    "description": "Activate the trinity assembly sub-pipeline",
-                    "fa_icon": "fas fa-toolbox",
-                    "help_text": "Assemble short-reads into transcripts using Trinity"
-                },
                 "pasa": {
                     "type": "boolean",
                     "description": "Activate the PASA sub-pipeline",
@@ -402,8 +338,7 @@
                     "type": "boolean",
                     "description": "Activate search for ncRNAs with RFam/infernal",
                     "fa_icon": "fas fa-toolbox",
-                    "help_text": "Perform prediction of non-coding RNAs using CM profiles from Rfam release 14.",
-                    "default": true
+                    "help_text": "Perform prediction of non-coding RNAs using CM profiles from Rfam release 14."
                 }
             }
         },
@@ -465,7 +400,7 @@
                 "max_cpus": {
                     "type": "integer",
                     "description": "Maximum number of CPUs that can be requested for any single job.",
-                    "default": 48,
+                    "default": 100,
                     "fa_icon": "fas fa-microchip",
                     "hidden": true,
                     "help_text": "Use to set an upper-limit for the CPU requirement for each process. Should be an integer e.g. `--max_cpus 1`"
@@ -473,7 +408,7 @@
                 "max_memory": {
                     "type": "string",
                     "description": "Maximum amount of memory that can be requested for any single job.",
-                    "default": "100.GB",
+                    "default": "500.GB",
                     "fa_icon": "fas fa-memory",
                     "pattern": "^\\d+(\\.\\d+)?\\.?\\s*(K|M|G|T)?B$",
                     "hidden": true,
@@ -556,7 +491,7 @@
                 "tracedir": {
                     "type": "string",
                     "description": "Directory to keep pipeline Nextflow logs and reports.",
-                    "default": "/mnt/c/Users/andhlovu/Documents/yapgap/YAXGAP/pipeline_info",
+                    "default": "/home/andhlovu/yapgap/YAXGAP/pipeline_info",
                     "fa_icon": "fas fa-cogs",
                     "hidden": true
                 },
@@ -617,26 +552,165 @@
     "properties": {
         "assembly_ref": {
             "type": "string",
-            "default": "Zcapensis_draft2"
+            "default": "Zcapensis_draft_v3"
         },
         "db_ref": {
             "type": "string",
-            "default": "/opt/DB_REF/"
+            "default": "/home/andhlovu/DB_REF/"
         },
         "rfam_cm_gz": {
             "type": "string",
-            "default": "/opt/DB_REF/Rfam/14.10/Rfam.cm.gz"
+            "default": "/home/andhlovu/DB_REF/Rfam/14.10/Rfam.cm.gz"
         },
         "rfam_family_gz": {
             "type": "string",
-            "default": "/opt/DB_REF/Rfam/14.10/family.txt.gz"
-        },
-        "busco_config": {
-            "type": "string"
+            "default": "/home/andhlovu/DB_REF/Rfam/14.10/family.txt.gz"
         },
         "schema_ignore_params": {
             "type": "string",
             "default": "genomes"
+        },
+        "aligner": {
+            "type": "string",
+            "default": "hisat2"
+        },
+        "star_index": {
+            "type": "string"
+        },
+        "salmon_index": {
+            "type": "string"
+        },
+        "hisat2_index": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/hisat/"
+        },
+        "gtf": {
+            "type": "string"
+        },
+        "hisat2_build_memory": {
+            "type": "string",
+            "default": "100.GB"
+        },
+        "trimmer": {
+            "type": "string",
+            "default": "fastp"
+        },
+        "skip_qc": {
+            "type": "boolean"
+        },
+        "skip_fastqc": {
+            "type": "boolean"
+        },
+        "with_umi": {
+            "type": "boolean"
+        },
+        "skip_umi_extract": {
+            "type": "boolean"
+        },
+        "umitools_extract_method": {
+            "type": "string",
+            "default": "string"
+        },
+        "umitools_grouping_method": {
+            "type": "string",
+            "default": "directional"
+        },
+        "umitools_dedup_stats": {
+            "type": "boolean"
+        },
+        "umitools_bc_pattern": {
+            "type": "string"
+        },
+        "umitools_bc_pattern2": {
+            "type": "string"
+        },
+        "umitools_umi_separator": {
+            "type": "string"
+        },
+        "umi_discard_read": {
+            "type": "string"
+        },
+        "save_umi_intermeds": {
+            "type": "boolean"
+        },
+        "min_trimmed_reads": {
+            "type": "integer",
+            "default": 10000
+        },
+        "extra_trimgalore_args": {
+            "type": "string"
+        },
+        "extra_fastp_args": {
+            "type": "string"
+        },
+        "save_trimmed": {
+            "type": "boolean"
+        },
+        "skip_trimming": {
+            "type": "boolean"
+        },
+        "validationSkipDuplicateCheck": {
+            "type": "boolean"
+        },
+        "validationS3PathCheck": {
+            "type": "boolean"
+        },
+        "seq_center": {
+            "type": "string"
+        },
+        "save_unaligned": {
+            "type": "boolean",
+            "default": true
+        },
+        "bam_csi_index": {
+            "type": "boolean",
+            "default": true
+        },
+        "Uniprot_ref": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/SwissProt/uniprot_sprot.fasta"
+        },
+        "Pfam_hmm": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/Pfam/Pfam-A.hmm"
+        },
+        "stringtie": {
+            "type": "boolean"
+        },
+        "braker": {
+            "type": "boolean"
+        },
+        "braker3_apptainer": {
+            "type": "string",
+            "default": "/apps2/braker/braker3.sif"
+        },
+        "protein_db": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/OrthoDBv11/Viridiplantae.fa"
+        },
+        "rnaseq": {
+            "type": "boolean"
+        },
+        "genome_align": {
+            "type": "boolean"
+        },
+        "augustus_config_path": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/Augustus/config"
+        },
+        "busco_lineage": {
+            "type": "string",
+            "default": "/home/andhlovu/DB_REF/BUSCO/liliopsida_odb10"
+        },
+        "other_proteins": {
+            "type": "boolean"
+        },
+        "related_protein": {
+            "type": "boolean"
+        },
+        "genome_busco": {
+            "type": "boolean",
+            "default": true
         }
     }
 }

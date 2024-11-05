@@ -20,12 +20,15 @@ workflow PASA_PIPELINE {
        GAAS_FASTACLEANER(
           transcripts
        )
+       
        EXONERATE_FASTACLEAN(
           GAAS_FASTACLEANER.out.fasta
        )
+       
        PASA_SEQCLEAN(
           EXONERATE_FASTACLEAN.out.fasta
        )
+       
        PASA_ALIGNASSEMBLE(
           genome,
           PASA_SEQCLEAN.out.fasta,
@@ -35,6 +38,7 @@ workflow PASA_PIPELINE {
        PASA_ASMBLSTOTRAINING(
           PASA_ALIGNASSEMBLE.out.pasa_out
        )
+       
        HELPER_PASA2TRAINING(
            PASA_ASMBLSTOTRAINING.out.gff,
            params.pasa_nmodels
@@ -49,7 +53,6 @@ workflow PASA_PIPELINE {
 
 
 def create_transcript_channel(transcripts) {
-    println transcripts
 
     def meta = [:]
     meta.id           = file(transcripts).getSimpleName()

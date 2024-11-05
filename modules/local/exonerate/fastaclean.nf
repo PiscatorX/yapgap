@@ -17,9 +17,10 @@ process EXONERATE_FASTACLEAN {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    fasta_clean = fasta.getBaseName() + ".exclean.fasta"
-    """
-    fastaclean -f $fasta -p | sed "s/:filter(clean)//" | sed "s/ pep .*//" > $fasta_clean
+    fasta_clean = meta.id + ".exclean.fasta"
+    """ 
+    fastaclean -f ${fasta} -p | sed "s/:filter(clean)//" | sed "s/ pep .*//" > $fasta_clean
+
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         fastaclean: \$(echo \$(fastaclean -h | head -n1 | cut -f5 -d " " ))

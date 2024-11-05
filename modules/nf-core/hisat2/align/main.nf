@@ -42,6 +42,7 @@ process HISAT2_ALIGN {
         hisat2 \\
             -x \$INDEX \\
             -U $reads \\
+	    --dta \\
             $strandedness \\
             $ss \\
             --summary-file ${prefix}.hisat2.summary.log \\
@@ -65,6 +66,7 @@ process HISAT2_ALIGN {
             -x \$INDEX \\
             -1 ${reads[0]} \\
             -2 ${reads[1]} \\
+            --dta \\
             $strandedness \\
             $ss \\
             --summary-file ${prefix}.hisat2.summary.log \\

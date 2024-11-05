@@ -12,7 +12,7 @@ process INFERNAL_PRESS {
     tuple val(meta), path(cm_file)
 
     output:
-    tuple val(meta), path(cm_file), emit:cm_file
+    tuple val(meta), path(cm_file), emit: cm_file
     path("*.i1?"), emit: cm_index
     path "versions.yml", emit: versions
 
