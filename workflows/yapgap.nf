@@ -38,7 +38,6 @@ ch_rna_samplesheet = Channel.fromSamplesheet("rnaseq_samples")
 
 if (params.proteins) { ch_proteins = file(params.proteins, checkIfExists: true) } else { ch_proteins = Channel.empty() }
 if (params.busco_lineage) { ch_busco_lineage =  channel.fromPath(params.busco_lineage, checkIfExists: true) } else { ch_busco_lineage = Channel.empty() }
-if (params.proteins_targeted) { ch_proteins_targeted = file(params.proteins_targeted, checkIfExists: true) } else { ch_proteins_targeted = Channel.empty() }
 if (params.transcripts) { ch_t = file(params.transcripts) } else { ch_transcripts = Channel.empty() }
 if (params.rm_lib) { ch_repeats = Channel.fromPath(file(params.rm_lib, checkIfExists: true)) } else { ch_repeats = Channel.empty()  }
 if (params.references) { ch_ref_genomes = Channel.fromPath(params.references, checkIfExists: true)  } else { ch_ref_genomes = Channel.empty() }
@@ -82,7 +81,7 @@ include { RNASEQ_ALIGN } from '../subworkflows/local/rnaseq_align'
 include { HISAT2_ALIGN } from '../modules/local/hisat2/align/main'
 include { TRANSDECODER } from  '../subworkflows/local/transdecoder'
 include { BRAKER } from  '../modules/local/braker'
-include { TBLASTN_SPLAN } from  '../subworkflows/local/tblastn_exonerate'
+include { TBLASTN_SPALN } from  '../subworkflows/local/tblastn_spaln'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -94,6 +93,7 @@ include { TBLASTN_SPLAN } from  '../subworkflows/local/tblastn_exonerate'
 // MODULE: Installed directly from nf-core
 //
 
+include { AGAT_CONVERTSPGXF2GXF } from '../modules/nf-core/agat/convertspgxf2gxf/main'
 include { BUSCO_BUSCO as BUSCO_GENOME; BUSCO_BUSCO as BUSCO_PROTEIN } from '../modules/nf-core/busco/busco/main'
 include { ASSEMBLYSCAN } from '../modules/nf-core/assemblyscan/main'
 include { SAMTOOLS_MERGE } from '../modules/local/samtools/merge'
@@ -125,7 +125,8 @@ workflow YAPGAP {
     ch_hints = Channel.empty()
     ch_genes_gff = Channel.empty()
     ch_proteins_gff = Channel.empty()
-   
+    ch_transcripts_gff = Channel.empty()		    
+
     /* ############################### PREPROCESS ################################### */
     
     ASSEMBLY_PREPROCESS(ch_assembly)
@@ -141,6 +142,7 @@ workflow YAPGAP {
     if (params.genome_busco){
 
         lineage = channel.fromPath(params.busco_lineage).map{ it.baseName }
+
         BUSCO_GENOME(ch_assembly, "genome", lineage, ch_busco_lineage, [])
 	
     }
@@ -162,18 +164,26 @@ workflow YAPGAP {
     	NCRNA(ch_assembly, total_contig_length, fasta_chunks, create_file_channel(params.rfam_cm_gz), create_file_channel(params.rfam_family_gz))
 	
     }
+    
 
-     if (params.genome_align){
+    /* ############################# GENOME ALIGMENTS ##################################### */
+
+    
+    if (params.genome_align){
 
         GENOME_ALIGN(ch_assembly, ch_ref_genomes)  
 
     }
 
 
-    if (params.proteins_targeted){
+   /* ############################ PROTEIN ALIGNMENTS ##################################### */
+   
+  
+   if (params.proteins_targeted){
 
-        TBLASTN_SPLAN(ch_assembly, ch_ref_genomes, params.spaln_protein_id_targeted)
-	ch_genes_gff = ch_genes_gff.mix(SPALN_ALIGN_MODELS.out.gff)
+        TBLASTN_SPALN(ch_assembly, ch_ref_genomes, params.spaln_protein_id_targeted)
+
+	ch_genes_gff = ch_genes_gff.mix(TBLASTN_SPALN.out.gff)
 		
      }
     
@@ -191,7 +201,7 @@ workflow YAPGAP {
     } 
 
 
-    /* ################################## NCRNA ####################################### */
+   /* ############################# RNASEQ DATA ##################################### */
 
     
     //RNA ALIGNMENTS
@@ -322,50 +332,58 @@ workflow YAPGAP {
 
         STRINGTIE_STRINGTIE(ch_genome_bam, [])
 	
+	ch_versions = ch_versions.mix(STRINGTIE_STRINGTIE.out.versions)
+
         STRINGTIE_MERGE(STRINGTIE_STRINGTIE.out.transcript_gtf.collect { it[1] }, [])
-	
+        
+	ch_transcripts_gff = AGAT_CONVERTSPGXF2GXF(STRINGTIE_MERGE.out.gtf.map{ gtf -> [insert_meta(params.assembly), gtf ] })
+
         TRANSDECODER(STRINGTIE_MERGE.out.gtf.map{ [ insert_meta(params.assembly), it ] },
-     		   ch_assembly,
-       		   params.Pfam_hmm,
-       		   create_file_channel(params.Uniprot_ref))
+     		    ch_assembly,
+       		    params.Pfam_hmm,
+       		    create_file_channel(params.Uniprot_ref))
 		  
-       gff3 = TRANSDECODER.out.gff3
-       cds  = TRANSDECODER.out.cds
-       pep  = TRANSDECODER.out.pep
-       bed  = TRANSDECODER.out.bed
-       ch_versions = ch_versions.mix(TRANSDECODER.out.versions)
-       
-     
-     if (params.pasa) {
+        cds  = TRANSDECODER.out.cds
+        pep  = TRANSDECODER.out.pep
+        bed  = TRANSDECODER.out.bed
+        ch_proteins_gff = ch_proteins_gff.mix(TRANSDECODER.out.gff3)
+        ch_versions = ch_versions.mix(TRANSDECODER.out.versions)
+            
+   if (params.pasa) {
     
         PASA_PIPELINE(ASSEMBLY_PREPROCESS.out.fasta, TRANSDECODER.out.transcripts)
         ch_versions = ch_versions.mix(PASA_PIPELINE.out.versions)
         ch_genes_gff = ch_genes_gff.mix(PASA_PIPELINE.out.gff)
+
      }
      
    }
    
    if (params.braker){
      			    
-       BRAKER(ch_assembly,
-              params.protein_db,
-       	      ch_genome_bam_merged,
-       	      ch_augustus_config_path,
-       	      [])
+       // BRAKER(ch_assembly,
+       //        params.protein_db,
+       // 	      ch_genome_bam_merged,
+       // 	      ch_augustus_config_path,
+       // 	      [])
+       // braker_gff = Channel.fromPath("/home/andhlovu/DB_REF/braker/braker.gff3")
+       //ch_genes_gff = ch_genes_gff.mix(braker_gff)
 
     }
-
-    if (params.evm) {
-       EVM(ch_assembly,
-           ch_genes_gff.map{m,g -> g}.collectFile(name: 'genes.gff3'),
-           ch_proteins_gff.map{m,p -> p}.mix(ch_empty_gff).collectFile(name: 'proteins.gff3'),
-           ch_transcripts_gff.map{m,t ->t}.mix(ch_empty_gff).collectFile(name: 'transcripts.gff3'),
-           ch_evm_weights)
+   }
+   
+    // if (params.evm) {
+    //    EVM(ch_assembly,
+    //        ch_genes_gff.map{m,g -> g}.collectFile(name: 'genes.gff3'),
+    //        ch_proteins_gff.map{m,p -> p}.mix(ch_empty_gff).collectFile(name: 'proteins.gff3'),
+    //        ch_transcripts_gff.map{m,t ->t}.mix(ch_empty_gff).collectFile(name: 'transcripts.gff3'),
+    //        ch_evm_weights)
 	   
-       ch_proteins_fa = ch_proteins_fa.mix(EVM.out.proteins)
-    }
-  }
+    //    ch_proteins_fa = ch_proteins_fa.mix(EVM.out.proteins)
+    //}
+
 }
+
 
 
 
