@@ -1,10 +1,9 @@
-# ![nf-core/genomeannotator](docs/images/nf-core-genomeannotator_logo_light.png#gh-light-mode-only) ![nf-core/genomeannotator](docs/images/nf-core-genomeannotator_logo_dark.png#gh-dark-mode-only)
 
 ## Introduction
 
-YAPGAP is a fork of **nf-core/genomeannotator** is a bioinformatics best-practice analysis pipeline for the annotation of eukaryote genomes.
+YAPGAP is a fork of **nf-core/genomeannotator** (a bioinformatics best-practice analysis pipeline for the annotation of eukaryote genomes.
 
-YAPGAP was developed to address to be faster implementation of genomeannotator so some tools have been replaced, however, overall it copy of the **nf-core/genomeannotator** and we grate for their pipeline and therefore some to the content the sames the original pipeline 
+YAPGAP was developed some challenges with the speed and issues with genomeannotator, so some tools have been replaced, however, overall it is copy of the **nf-core/genomeannotator** and we gratefull for their pipeline and therefore some to the content here remains the  sames the original pipeline 
 
 The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
 
