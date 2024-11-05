@@ -35,7 +35,7 @@ workflow SPALN_ALIGN_PROTEIN {
        
        SPALN_MAKEINDEX(assembly)  
 
-       ch_fasta_chunks = GAAS_FASTAFILTERBYSIZE.out.fasta.splitFasta(by: params.nproteins, file: true, elem: [1])
+       ch_fasta_chunks = GAAS_FASTAFILTERBYSIZE.out.fasta.splitFasta(by: params.nproteins_other, file: true, elem: [1])
        
        SPALN_ALIGN(
           SPALN_MAKEINDEX.out.spaln_index,

@@ -16,7 +16,7 @@ include { FILTER_PROTEIN } from '../../modules/local/filter_protein'
 
 
 
-workflow TBLASTN_EXONERATE{
+workflow TBLASTN_SPALN{
 
     take:
     assembly
@@ -49,7 +49,6 @@ workflow TBLASTN_EXONERATE{
           params.spaln_q,
           params.spaln_options)
 
-     
     SPALN_MERGE(
           SPALN_MAKEINDEX.out.spaln_index,
           SPALN_ALIGN.out.align.groupTuple().map { m,files -> tuple(m,files.flatten()) },
